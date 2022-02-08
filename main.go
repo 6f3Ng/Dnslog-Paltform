@@ -5,20 +5,26 @@ import (
 	"Dnslog-Paltform/Dns"
 	"Dnslog-Paltform/Http"
 	"strings"
-
-	"log"
-
-	"gopkg.in/gcfg.v1"
 )
 
 func main() {
-	var err = gcfg.ReadFileInto(&Core.Config, "./config.ini")
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
+	Core.Config.Init()
+	// log.Println(Core.Config.GetCfg().Section("DNS").Key("Domain"))
+	cfg := Core.Config.GetCfg()
+
 	for _, v := range strings.Split(Core.Config.HTTP.Token, ",") {
 		Core.User[v] = Core.GetRandStr()
+		if cfg.HasSection(v) {
+			if !cfg.Section(v).HasKey("num") {
+				cfg.Section(v).NewKey("num", "5")
+			}
+			continue
+		}
+		cfg.NewSection(v)
+		cfg.Section(v).NewKey("num", "5")
 	}
+	Core.Config.SaveCfg()
+
 	go Dns.ListingDnsServer()
 	Http.ListingHttpManagementServer()
 

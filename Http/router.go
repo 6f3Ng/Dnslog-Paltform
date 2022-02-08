@@ -3,6 +3,9 @@ package Http
 import (
 	"Dnslog-Paltform/Core"
 	"Dnslog-Paltform/Dns"
+	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -106,6 +109,124 @@ func verifyDns(c *gin.Context) {
 			}
 		}
 		c.JSON(200, gin.H(resp))
+	} else {
+		c.JSON(403, gin.H{
+			"HTTPStatusCode": "403",
+			"Msg":            "false",
+		})
+	}
+}
+
+func setDDns(c *gin.Context) {
+	token := c.GetHeader("token")
+	if Core.VerifyToken(token) {
+		cfg := Core.Config.GetCfg()
+		domain, ok := c.GetQuery("domain")
+		if ok && strings.HasSuffix(domain, Core.Config.Dns.Domain) {
+			if !cfg.Section("DDNS").HasKey(domain) {
+				num, _ := strconv.Atoi(cfg.Section(token).Key("num").String())
+				if len(cfg.Section(token).KeyStrings()) > num {
+					c.JSON(403, gin.H{
+						"HTTPStatusCode": "403",
+						"Msg":            "to many domains",
+					})
+				} else {
+					ip, ok := c.GetQuery("ip")
+					reg := regexp.MustCompile(`((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}`)
+					if ok && reg.MatchString(ip) {
+						cfg.Section("DDNS").NewKey(domain, ip)
+					} else {
+						cfg.Section("DDNS").NewKey(domain, c.ClientIP())
+					}
+					cfg.Section(token).NewKey(domain, "true")
+					Core.Config.SaveCfg()
+					c.JSON(200, gin.H{
+						"HTTPStatusCode": "200",
+						"Msg":            "success",
+					})
+				}
+			} else if cfg.Section("DDNS").HasKey(domain) && !cfg.Section(token).HasKey(domain) {
+				c.JSON(403, gin.H{
+					"HTTPStatusCode": "403",
+					"Msg":            "others used this domain",
+				})
+			} else {
+				ip, ok := c.GetQuery("ip")
+				reg := regexp.MustCompile(`((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}`)
+				if ok && reg.MatchString(ip) {
+					cfg.Section("DDNS").NewKey(domain, ip)
+				} else {
+					cfg.Section("DDNS").NewKey(domain, c.ClientIP())
+				}
+				cfg.Section(token).NewKey(domain, "true")
+				Core.Config.SaveCfg()
+				c.JSON(200, gin.H{
+					"HTTPStatusCode": "200",
+					"Msg":            "success",
+				})
+			}
+		} else {
+			c.JSON(403, gin.H{
+				"HTTPStatusCode": "403",
+				"Msg":            "get param error",
+			})
+		}
+	} else {
+		c.JSON(403, gin.H{
+			"HTTPStatusCode": "403",
+			"Msg":            "false",
+		})
+	}
+}
+
+func delDDns(c *gin.Context) {
+	token := c.GetHeader("token")
+	if Core.VerifyToken(token) {
+		cfg := Core.Config.GetCfg()
+		domain, ok := c.GetQuery("domain")
+		if ok && strings.HasSuffix(domain, Core.Config.Dns.Domain) {
+			if cfg.Section(token).HasKey(domain) {
+				cfg.Section("DDNS").DeleteKey(domain)
+				cfg.Section(token).DeleteKey(domain)
+				Core.Config.SaveCfg()
+				c.JSON(200, gin.H{
+					"HTTPStatusCode": "200",
+				})
+			} else {
+				c.JSON(403, gin.H{
+					"HTTPStatusCode": "403",
+					"Msg":            "no this domain",
+				})
+			}
+		} else {
+			c.JSON(403, gin.H{
+				"HTTPStatusCode": "403",
+				"Msg":            "get param error",
+			})
+		}
+	} else {
+		c.JSON(403, gin.H{
+			"HTTPStatusCode": "403",
+			"Msg":            "false",
+		})
+	}
+}
+
+func getDDnsList(c *gin.Context) {
+	token := c.GetHeader("token")
+	if Core.VerifyToken(token) {
+		cfg := Core.Config.GetCfg()
+		list := make(map[string]string)
+		for _, v := range cfg.Section(token).KeyStrings() {
+			if v == "num" {
+				list[v] = cfg.Section(token).Key(v).String()
+			}
+			list[v] = cfg.Section("DDNS").Key(v).String()
+		}
+		c.JSON(200, gin.H{
+			"HTTPStatusCode": "200",
+			"Msg":            list,
+		})
 	} else {
 		c.JSON(403, gin.H{
 			"HTTPStatusCode": "403",

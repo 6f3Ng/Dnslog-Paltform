@@ -61,12 +61,12 @@ func serverDNS(addr *net.UDPAddr, conn *net.UDPConn, msg dnsmessage.Message) {
 		queryType    = question.Type
 		queryName, _ = dnsmessage.NewName(queryNameStr)
 		resource     dnsmessage.Resource
-		queryDoamin  = strings.Replace(queryNameStr, fmt.Sprintf(".%s.", Core.Config.Dns.Dnslog), "", 1)
 	)
 	var resIp [4]byte
 	// fmt.Println(queryNameStr[:len(queryNameStr)-1], " ", Core.Config.Dns.Xip)
 	// 域名过滤，避免网络扫描
 	if strings.HasSuffix(queryNameStr[:len(queryNameStr)-1], Core.Config.Dns.Dnslog) {
+		queryDoamin := strings.Replace(queryNameStr, fmt.Sprintf(".%s.", Core.Config.Dns.Dnslog), "", 1)
 		randStr := strings.Split(queryDoamin, ".")
 		token := Core.GetUser(randStr[len(randStr)-1])
 		if token != "other" {
@@ -83,6 +83,7 @@ func serverDNS(addr *net.UDPAddr, conn *net.UDPConn, msg dnsmessage.Message) {
 		if reg == nil {
 			resIp = [4]byte{127, 0, 0, 1}
 		}
+		queryDoamin := strings.Replace(queryNameStr, fmt.Sprintf(".%s.", Core.Config.Dns.Xip), "", 1)
 		resIpStr := reg.FindString(queryDoamin)
 		if resIpStr == "" {
 			resIp = [4]byte{127, 0, 0, 1}

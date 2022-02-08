@@ -11,7 +11,7 @@ Dnslog-Platform 改自项目 https://github.com/lanyi1998/DNSlog-GO
 2. 增加`xip`功能实现，参考`xip.io`
 3. 优化部分逻辑；修改原项目子域生成逻辑，由服务端实现
 4. 修改`readme`中的部分安装逻辑，由原来的`2`个域名和`1`个公网 IP 变成`1`个域名和`1`个公网 IP 
-5. 增加`ddns`功能 (todo)
+5. 增加`ddns`功能 (todo，完成`delDDns`、`getDDnsList`、`setDDns`api)
 
 # 安装
 ---
@@ -43,7 +43,7 @@ Dnslog-Platform 改自项目 https://github.com/lanyi1998/DNSlog-GO
 
 ## 3.修改配置文件 config.ini
 
-```
+```ini
 [HTTP]
 Port = 8080  //http web监听端口
 Token = admin1,admin2 //多个用户token，用,分割。可以团队成员一起使用了
@@ -59,7 +59,7 @@ Dnslog = log.demo.com //用于dnslog解析
 
 ## 5.注册为系统服务，随系统启动
 在`/etc/systemd/system/`创建`dnslog.service`，填入以下内容
-```
+```ini
 [Unit]
 Description=DnsLog
 
@@ -80,7 +80,12 @@ systemctl start dnslog.service # 启动服务
 systemctl enable dnslog.service # 设置为开机自启动
 systemctl status dnslog.service # 查看dnslog运行状态
 ```
-
+## 6.DDNS api
+```
+[GET] /api/getDDnsList [HEADER] token:token1
+[GET] /api/setDDns [PARAM] domain=aaa.dns.demo.com(&ip=192.168.220.100) [HEADER] token:token1
+[GET] /api/delDDns [PARAM] domain=aaa.dns.demo.com [HEADER] token:token1
+```
 
 # API Python Demo
 原项目中的 api 查询实例
