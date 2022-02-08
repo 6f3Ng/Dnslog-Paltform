@@ -53,6 +53,28 @@ ConsoleDisable = false //是否关闭web页面
 Domain = dns.demo.com //预留用于ddns
 Xip = xip.demo.com //用于xip解析
 Dnslog = log.demo.com //用于dnslog解析
+
+[DDNS]
+aaaDomain1.dns.demo.com  = 192.168.220.130
+bbbDomain2.dns.demo.com  = 192.168.220.120
+dddDomain4.dns.demo.com  = 127.0.0.1
+aaab.dns.demo.com        = 192.168.220.1
+aaabc.dns.demo.com       = 127.0.0.1
+aaaDomain12.dns.demo.com = 192.168.220.129
+cccDomain3.dns.demo.com  = 192.168.220.100
+
+[admin1]
+aaaDomain1.dns.demo.com = true
+bbbDomain2.dns.demo.com = true
+num                     = 5
+aaab.dns.demo.com       = true
+aaabc.dns.demo.com      = true
+
+[admin2]
+cccDomain3.dns.demo.com  = true
+dddDomain4.dns.demo.com  = true
+num                      = 5
+aaaDomain12.dns.demo.com = true
 ```
 
 ## 4.启动对应系统的客户端，注意服务端重启以后，必须清空一下浏览器中的localStorage,否则会获取不到数据
