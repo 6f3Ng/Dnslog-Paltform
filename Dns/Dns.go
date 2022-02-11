@@ -93,6 +93,12 @@ func serverDNS(addr *net.UDPAddr, conn *net.UDPConn, msg dnsmessage.Message) {
 			ip4 := net.IP.To4(ip)
 			resIp = [4]byte{ip4[0], ip4[1], ip4[2], ip4[3]}
 		}
+	} else if strings.HasSuffix(queryNameStr[:len(queryNameStr)-1], Core.Config.Dns.Domain) {
+		// DDNS域名解析
+		cfg := Core.Config.GetCfg()
+		ip := net.ParseIP(cfg.Section("DDNS").Key(queryNameStr[:len(queryNameStr)-1]).String())
+		ip4 := net.IP.To4(ip)
+		resIp = [4]byte{ip4[0], ip4[1], ip4[2], ip4[3]}
 	} else {
 		resIp = [4]byte{127, 0, 0, 1}
 	}

@@ -21,7 +21,7 @@ func main() {
 			continue
 		}
 		cfg.NewSection(v)
-		cfg.Section(v).NewKey("num", "5")
+		cfg.Section(v).Key("num").SetValue("5")
 	}
 	Core.Config.SaveCfg()
 

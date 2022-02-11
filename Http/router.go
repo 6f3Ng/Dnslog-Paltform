@@ -132,7 +132,7 @@ func setDDns(c *gin.Context) {
 					})
 				} else {
 					ip, ok := c.GetQuery("ip")
-					reg := regexp.MustCompile(`((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}`)
+					reg := regexp.MustCompile(`^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$`)
 					if ok && reg.MatchString(ip) {
 						cfg.Section("DDNS").NewKey(domain, ip)
 					} else {
@@ -152,13 +152,13 @@ func setDDns(c *gin.Context) {
 				})
 			} else {
 				ip, ok := c.GetQuery("ip")
-				reg := regexp.MustCompile(`((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}`)
+				reg := regexp.MustCompile(`^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$`)
 				if ok && reg.MatchString(ip) {
-					cfg.Section("DDNS").NewKey(domain, ip)
+					cfg.Section("DDNS").Key(domain).SetValue(ip)
 				} else {
-					cfg.Section("DDNS").NewKey(domain, c.ClientIP())
+					cfg.Section("DDNS").Key(domain).SetValue(c.ClientIP())
 				}
-				cfg.Section(token).NewKey(domain, "true")
+				cfg.Section(token).Key(domain).SetValue("true")
 				Core.Config.SaveCfg()
 				c.JSON(200, gin.H{
 					"HTTPStatusCode": "200",
